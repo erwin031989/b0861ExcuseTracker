@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B0861 STO. TOMAS EXCUSES</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2 {
+            color: #4a4a4a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            text-align: center;
+            padding: 10px;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+            font-weight: bold;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #eaf4ff;
+        }
+        td input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 2px;
+        }
+        .button-container {
+            margin: 10px 0;
+        }
+        button {
+            margin-right: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        button#clearBtn {
+            background-color: #dc3545;
+        }
+        button#clearBtn:hover {
+            background-color: #c82333;
+        }
+        button#viewDataBtn {
+            background-color: #17a2b8;
+        }
+        button#viewDataBtn:hover {
+            background-color: #138496;
+        }
+        .grand-total-row {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            text-align: center;
+        }
+        .grand-total-cell {
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>B0861 STO. TOMAS EXCUSES</h1>
+
+    <div class="button-container">
+        <label for="dateField">Date:</label>
+        <input type="date" id="dateField" required>
+        <button id="saveBtn">Save</button>
+        <button id="viewBtn">View Data</button>
+        <button id="clearBtn">Clear</button>
+    </div>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Reasons</th>
+                <th>MFO 1</th>
+                <th>MFO 2</th>
+                <th>MFO 3</th>
+                <th>MFO 4</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be dynamically populated -->
+        </tbody>
+        <tfoot>
+            <tr class="grand-total-row">
+                <td colspan="5">Grand Total</td>
+                <td id="grandTotalCell" class="grand-total-cell">0</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <h2>Saved Data</h2>
+    <div>
+        <label for="viewDate">Select Date:</label>
+        <input type="date" id="viewDate">
+        <button id="viewDataBtn">View Data</button>
+    </div>
+
+    <table id="savedDataTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Reasons</th>
+                <th>MFO 1</th>
+                <th>MFO 2</th>
+                <th>MFO 3</th>
+                <th>MFO 4</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be displayed here -->
+        </tbody>
+        <tfoot>
+            <tr class="grand-total-row">
+                <td colspan="6">Grand Total</td>
+                <td id="savedGrandTotalCell" class="grand-total-cell">0</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <script>
+        // Initialize data
+        const reasons = [
+            "1. Insufficient Payment",
+            "2. Hospitalization",
+            "3. Death of Client/Family Member",
+            "4. Hiding",
+            "5. Bankruptcy",
+            "6. NCNO",
+            "7. NCNW",
+            "8. Provincial Travel",
+            "9. Runaway",
+            "10. Lack of Income/Lost Jobs",
+            "11. Clients'/Husbands' Imprisonment",
+            "12. Paying Subsidiary Only",
+            "13. Typhoon",
+            "14. Dummy Account"
+        ];
+
+        const tableBody = document.querySelector('#dataTable tbody');
+
+        reasons.forEach(reason => {
+            const tr = document.createElement('tr');
+
+            const tdReason = document.createElement('td');
+            tdReason.textContent = reason;
+            tr.appendChild(tdReason);
+
+            for (let i = 1; i <= 4; i++) {
+                const tdMFO = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = 0;
+                input.className = 'mfo-input';
+                input.dataset.mfo = i;
+                input.dataset.reason = reason;
+                input.value = 0;
+
+                input.addEventListener('input', () => {
+                    calculateRowTotal(input);
+                    updateGrandTotal();
+                });
+                tdMFO.appendChild(input);
+                tr.appendChild(tdMFO);
+            }
+
+            const tdTotal = document.createElement('td');
+            tdTotal.className = 'total-cell';
+            tdTotal.textContent = 0;
+            tr.appendChild(tdTotal);
+
+            tableBody.appendChild(tr);
+        });
+
+        function calculateRowTotal(input) {
+            const row = input.parentElement.parentElement;
+            let total = 0;
+
+            row.querySelectorAll('.mfo-input').forEach(input => {
+                total += parseInt(input.value || 0);
+            });
+
+            row.querySelector('.total-cell').textContent = total;
+        }
+
+        function updateGrandTotal() {
+            let grandTotal = 0;
+            document.querySelectorAll('.total-cell').forEach(cell => {
+                grandTotal += parseInt(cell.textContent || 0);
+            });
+
+            document.getElementById('grandTotalCell').textContent = grandTotal;
+        }
+
+        document.getElementById('viewDataBtn').addEventListener('click', function () {
+            const selectedDate = document.getElementById('viewDate').value;
+            const tableBody = document.querySelector('#savedDataTable tbody');
+
+            tableBody.innerHTML = ''; // Clear previous data
+
+            const savedData = JSON.parse(localStorage.getItem(`excuseData_${selectedDate}`)) || [];
+
+            if (savedData.length === 0) {
+                alert("No data found for the selected date.");
+                document.getElementById('savedGrandTotalCell').textContent = 0;
+                return;
+            }
+
+            let grandTotal = 0;
+
+            savedData.forEach(data => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${selectedDate}</td>
+                    <td>${data.reason}</td>
+                    <td>${data.mfo1}</td>
+                    <td>${data.mfo2}</td>
+                    <td>${data.mfo3}</td>
+                    <td>${data.mfo4}</td>
+                    <td>${data.total}</td>
+                `;
+                grandTotal += parseInt(data.total || 0);
+                tableBody.appendChild(tr);
+            });
+
+            document.getElementById('savedGrandTotalCell').textContent = grandTotal;
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', function () {
+            const date = document.getElementById('dateField').value;
+
+            if (!date) {
+                alert("Please select a date.");
+                return;
+            }
+
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+            const dataForDate = [];
+
+            rows.forEach(row => {
+                const reason = row.cells[0].textContent;
+                const mfo1 = row.cells[1].querySelector('input').value || 0;
+                const mfo2 = row.cells[2].querySelector('input').value || 0;
+                const mfo3 = row.cells[3].querySelector('input').value || 0;
+                const mfo4 = row.cells[4].querySelector('input').value || 0;
+                const total = row.cells[5].textContent;
+
+                dataForDate.push({ reason, mfo1, mfo2, mfo3, mfo4, total });
+            });
+
+            localStorage.setItem(`excuseData_${date}`, JSON.stringify(dataForDate));
+            alert(`Data for ${date} saved successfully.`);
+        });
+    </script>
+</body>
+</html>
